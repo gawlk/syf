@@ -1,0 +1,7 @@
+.draggable-mirror {
+  @apply z-[99];
+}
+
+.draggable-source--is-dragging {
+  @apply opacity-50;
+}

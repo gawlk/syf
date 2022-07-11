@@ -1,0 +1,8 @@
+.focusable {
+  @apply appearance-none focus:outline-none focus-visible:ring focus-visible:ring-black dark:focus-visible:ring-white;
+}
+
+.clickable {
+  @apply focusable cursor-pointer select-none transition will-change-transform disabled:transform-none disabled:cursor-default motion-reduce:transform-none;
+  -webkit-tap-highlight-color: transparent;
+}

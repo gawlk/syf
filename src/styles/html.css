@@ -1,0 +1,13 @@
+body {
+  @apply antialiased selection:bg-orange-200 selection:text-black;
+}
+
+a[target='_blank'] {
+  @apply after:content-['_↗'];
+}
+
+/* Remove details marker */
+::marker,
+::-webkit-details-marker {
+  display: none;
+}
