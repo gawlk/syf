@@ -1,15 +1,27 @@
-import { removeProps } from '/src/scripts'
+import {
+  removeProps,
+  convertRGBToBackgroundCSSRGB,
+  convertRGBToOffTextCSSRGB,
+  convertRGBToIconCSSRGB,
+} from '/src/scripts'
+import { styleToCSSProperties } from '/src/styles'
 import { defaultRounded } from './defaults'
 
 import Icon from './icon'
 
 export interface InteractiveProps extends SolidJS.ParentProps {
+  // Text
+  pre?: string
+
   // Full
   full?: boolean
 
   // Sizes
   lg?: boolean
   sm?: boolean
+
+  // Padding
+  square?: boolean
 
   // Round
   rounded?: boolean
@@ -21,29 +33,34 @@ export interface InteractiveProps extends SolidJS.ParentProps {
   // Center
   center?: boolean
 
-  // Colors
+  // Color
+  rgb?: RGB
   primary?: boolean
   secondary?: boolean
   tertiary?: boolean
   transparent?: boolean
 
-  // States
+  // State
   disabled?: boolean
   clickable?: boolean
+  focusable?: boolean
 
-  // Illustrations
-  svg?: any
-  leftSvg?: any
-  rightSvg?: any
-  src?: string
-  leftSrc?: string
-  rightSrc?: string
+  // Icons
+  icon?: Icon
+  leftIcon?: Icon
+  rightIcon?: Icon
 
   // Classes
   class?: string
-  illustrationClass?: string
-  leftIllustrationClass?: string
-  rightIllustrationClass?: string
+  iconClass?: string
+  leftIconClass?: string
+  rightIconClass?: string
+
+  // Styles
+  style?: string | SolidJS.JSXCSSProperties
+  iconStyle?: string | SolidJS.JSXCSSProperties
+  leftIconStyle?: string | SolidJS.JSXCSSProperties
+  rightIconStyle?: string | SolidJS.JSXCSSProperties
 }
 
 export type InteractivePropsKeys = keyof Required<InteractiveProps>
@@ -53,29 +70,34 @@ export const propsSpecificToInteractive: {
 } = {
   disabled: false,
 
+  pre: true,
   children: true,
   full: true,
   lg: true,
   sm: true,
+  square: true,
   rounded: true,
   roundedFull: true,
   border: true,
   center: true,
+  rgb: true,
   primary: true,
   secondary: true,
   tertiary: true,
   transparent: true,
   clickable: true,
-  svg: true,
-  leftSvg: true,
-  rightSvg: true,
-  src: true,
-  leftSrc: true,
-  rightSrc: true,
+  focusable: true,
+  icon: true,
+  leftIcon: true,
+  rightIcon: true,
   class: true,
-  illustrationClass: true,
-  leftIllustrationClass: true,
-  rightIllustrationClass: true,
+  iconClass: true,
+  leftIconClass: true,
+  rightIconClass: true,
+  style: true,
+  iconStyle: true,
+  leftIconStyle: true,
+  rightIconStyle: true,
 }
 
 interface Props extends InteractiveProps {
@@ -90,9 +112,31 @@ export default (props: Props) => {
     class: true,
   })
 
+  const hasBorder = props.border || props.secondary
+
+  const customColors = props.rgb
+    ? {
+        background: convertRGBToBackgroundCSSRGB(props.rgb),
+        border: convertRGBToBackgroundCSSRGB(props.rgb),
+        icon: convertRGBToIconCSSRGB(props.rgb),
+        offText: convertRGBToOffTextCSSRGB(props.rgb),
+      }
+    : undefined
+
+  const style: SolidJS.JSXCSSProperties = {
+    ...(customColors?.background && props.clickable
+      ? { 'background-color': customColors.background }
+      : {}),
+    ...(customColors?.border && hasBorder
+      ? { 'border-color': customColors.border }
+      : {}),
+    ...styleToCSSProperties(props.style),
+  }
+
   return (
     <Dynamic
       {...dynamicProps}
+      style={style}
       class={[
         // Full
         props.full ? 'w-full min-w-0' : '',
@@ -101,20 +145,20 @@ export default (props: Props) => {
         props.lg ? 'text-lg' : props.sm ? 'text-sm' : 'text-base',
 
         // Padding
-        props.border || props.secondary // If has border
+        hasBorder
           ? props.lg
             ? 'p-3'
             : props.sm
             ? 'p-2'
-            : 'p-2.5'
+            : 'p-[0.5625rem]'
           : props.lg
           ? 'p-3.5'
           : props.sm
           ? 'p-2.5'
           : 'p-3',
-        props.svg || props.src
+        props.icon || props.square
           ? ''
-          : props.border || props.secondary // If has border
+          : hasBorder
           ? props.lg
             ? 'px-[1.875rem]'
             : props.sm
@@ -130,7 +174,7 @@ export default (props: Props) => {
         props.roundedFull
           ? 'rounded-full'
           : props.rounded ?? defaultRounded
-          ? 'rounded-lg'
+          ? 'rounded-xl'
           : '',
 
         // Border
@@ -145,74 +189,91 @@ export default (props: Props) => {
           : props.secondary
           ? 'border-black dark:border-white dark:text-white'
           : props.border
-          ? 'border-black border-opacity-5 hover:border-opacity-10 dark:border-white dark:text-white'
+          ? 'border-stone-100'
           : 'text-black dark:text-white',
 
         // Background colors
-        props.primary
+        props.rgb || props.secondary || props.border
+          ? ''
+          : props.primary
           ? 'bg-black dark:bg-white'
-          : props.secondary || props.border || props.transparent
-          ? 'bg-transparent'
-          : 'bg-black bg-opacity-5 dark:bg-white',
+          : 'bg-stone-100 dark:bg-stone-900',
+        props.transparent ? 'bg-opacity-0' : '',
 
         // Hover colors
         !props.disabled
           ? props.primary
-            ? 'hover:bg-opacity-90'
-            : props.secondary
-            ? 'hover:bg-opacity-10'
-            : props.transparent
-            ? ''
-            : 'hover:bg-opacity-10'
+            ? 'hover:brightness-110'
+            : 'hover:bg-opacity-100 hover:brightness-[0.925]'
           : '',
 
         // Disabled
-        props.disabled ? '' : 'group',
+        props.disabled
+          ? 'opacity-60'
+          : props.clickable || props.focusable
+          ? `group ${props.clickable ? 'clickable' : 'focusable'}`
+          : '',
 
-        // Clickable
-        props.clickable ? 'clickable active:scale-95' : 'focusable',
-
-        'z-10 inline-flex items-center disabled:opacity-60 disabled:transition-none',
+        'z-10 inline-flex items-center',
 
         props.class || '',
-      ].join(' ')}
+      ]
+        .flat()
+        .join(' ')}
     >
       <Show
-        when={!props.svg && !props.src}
+        when={!props.icon}
         fallback={
           <Icon
             {...iconsProps}
-            svg={props.svg}
-            src={props.src}
-            class={props.illustrationClass}
+            icon={props.icon}
+            class={props.iconClass}
+            style={{
+              ...(customColors?.icon ? { color: customColors.icon } : {}),
+              ...styleToCSSProperties(props.iconStyle),
+            }}
           />
         }
       >
-        <Show when={props.leftSvg || props.leftSrc}>
+        <Show when={props.leftIcon}>
           <Icon
             {...iconsProps}
-            svg={props.leftSvg}
-            src={props.leftSrc}
+            icon={props.leftIcon}
             left={true}
-            class={props.leftIllustrationClass}
+            class={props.leftIconClass}
+            style={{
+              ...(customColors?.icon ? { color: customColors.icon } : {}),
+              ...styleToCSSProperties(props.leftIconStyle),
+            }}
           />
+        </Show>
+
+        <Show when={props.pre}>
+          <span
+            class={[
+              props.primary ? 'text-stone-400' : 'text-stone-500',
+              'whitespace-pre-wrap',
+            ].join(' ')}
+            style={{
+              ...(customColors?.offText ? { color: customColors.offText } : {}),
+            }}
+          >
+            {props.pre}:{' '}
+          </span>
         </Show>
 
         {props.children}
 
-        <Show
-          when={
-            props.rightSvg ||
-            props.rightSrc ||
-            (props.center && (props.leftSvg || props.leftSrc))
-          }
-        >
+        <Show when={props.rightIcon || (props.center && props.leftIcon)}>
           <Icon
             {...iconsProps}
-            svg={props.rightSvg}
-            src={props.rightSrc}
+            icon={props.rightIcon}
             right={true}
-            class={props.rightIllustrationClass}
+            class={props.rightIconClass}
+            style={{
+              ...(customColors?.icon ? { color: customColors.icon } : {}),
+              ...styleToCSSProperties(props.rightIconStyle),
+            }}
           />
         </Show>
       </Show>

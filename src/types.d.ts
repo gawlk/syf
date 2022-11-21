@@ -1,7 +1,3 @@
-// type AccessorSetter<T> = <U extends T>(
-//   v: (U extends Function ? never : U) | ((prev: T) => U)
-// ) => U
-
 declare namespace SolidJS {
   export type Accessor<T> = import('solid-js').Accessor<T>
   export type Component<T> = import('solid-js').Component<T>
@@ -17,10 +13,13 @@ declare namespace SolidJS {
     import('solid-js').JSX.InputHTMLAttributes<HTMLInputElement>
   export type JSXSelectHTMLAttributes =
     import('solid-js').JSX.SelectHTMLAttributes<HTMLSelectElement>
+  export type JSXDetailsHTMLAttributes =
+    import('solid-js').JSX.DetailsHtmlAttributes<HTMLDetailsElement>
   export type JSXDialogHTMLAttributes =
-    import('solid-js').JSX.DialogHtmlAttributes<HTMLElement>
+    import('solid-js').JSX.DialogHtmlAttributes<HTMLDialogElement>
 }
 
 declare namespace SolidAppRouter {
   export type LinkProps = import('solid-app-router').LinkProps
+  export type RouteDefinition = import('solid-app-router').RouteDefinition
 }

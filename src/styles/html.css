@@ -2,12 +2,29 @@ body {
   @apply antialiased selection:bg-orange-200 selection:text-black;
 }
 
+/*
 a[target='_blank'] {
   @apply after:content-['_↗'];
 }
+*/
 
 /* Remove details marker */
+details > summary {
+  list-style: none;
+}
 ::marker,
 ::-webkit-details-marker {
   display: none;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type='number'] {
+  -moz-appearance: textfield;
 }

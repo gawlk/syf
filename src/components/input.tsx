@@ -1,23 +1,34 @@
-import { filterPropsKeys, removeProps } from '/src/scripts'
+import {
+  filterPropsKeys,
+  removeProps,
+  addLocationToID,
+  debounce,
+  getDefaultDebounceWaitBasedOnCallback,
+} from '/src/scripts'
 
+import Button from './button'
+import ButtonDivider from './buttonDivider'
 import Interactive, {
   propsSpecificToInteractive,
   type InteractiveProps,
 } from './interactive'
 
 interface ComponentsProps {
-  datalist?: string[]
-  pre?: string
+  onInput: (value?: string, event?: InputEvent) => void
+  id?: string
+  debounce?: number
 }
 
 type ComponentsPropsKeys = keyof Required<ComponentsProps>
 
 const propsSpecificToComponent: { [T in ComponentsPropsKeys]: boolean } = {
-  datalist: true,
-  pre: true,
+  id: true,
+  onInput: true,
+  debounce: true,
 }
 
-interface Props
+// @ts-ignore next-line
+export interface Props
   extends ComponentsProps,
     SolidJS.JSXInputHTMLAttributes,
     InteractiveProps {}
@@ -29,7 +40,6 @@ export default (props: Props) => {
       border: true,
       type:
         props.type || (typeof props.value === 'number' ? 'number' : undefined),
-      class: props.class + ' [&:has(input:invalid)]:border-red-500',
     } as Props),
     propsSpecificToComponent
   )
@@ -42,6 +52,15 @@ export default (props: Props) => {
   let span: HTMLSpanElement | undefined
   let input: HTMLInputElement | undefined
   let observer: IntersectionObserver | undefined
+  let id: string | undefined
+
+  if (props.id) {
+    id = addLocationToID(props.id)
+
+    const saved = localStorage.getItem(id)
+
+    saved && String(saved) !== String(props.value) && props.onInput(saved)
+  }
 
   const updatePadding = () => {
     if (input && span) {
@@ -52,7 +71,20 @@ export default (props: Props) => {
     }
   }
 
-  const datalistID = createMemo(() => `${props.id}-datalist`)
+  const save = (value: string) => {
+    if (id) {
+      value ? localStorage.setItem(id, value) : localStorage.removeItem(id)
+    }
+  }
+
+  const needsFixing = createMemo(
+    () =>
+      !props.disabled &&
+      (props.max !== undefined || props.min !== undefined) &&
+      (props.value === undefined ||
+        (props.max !== undefined && props.value > props.max) ||
+        (props.min !== undefined && props.value < props.min))
+  )
 
   onMount(async () => {
     updatePadding()
@@ -80,29 +112,55 @@ export default (props: Props) => {
   })
 
   return (
-    // Relative can't be added to the Interactive element because of the border
-    <div class="relative">
-      <Interactive component={'div'} {...interactiveProps}>
-        <Show when={props.pre}>
-          <span class="whitespace-pre-wrap text-black text-opacity-50 group-hover:text-opacity-60">
-            {props.pre}:{' '}
-          </span>
-        </Show>
+    <div class="flex">
+      <Interactive
+        component={'div'}
+        focusable
+        {...interactiveProps}
+        class={[
+          'relative',
+          needsFixing() ? 'rounded-r-none' : '',
+          props.class || '',
+          '[&:has(input:invalid)]:border-red-500',
+        ].join(' ')}
+      >
         <span ref={span} class="flex-1" />
         <input
+          id={id}
           ref={input}
+          onInput={debounce((event: InputEvent) => {
+            const element = event.target as HTMLInputElement
+
+            const value = element.value
+
+            save(value)
+
+            props.onInput(value, event)
+          }, props.debounce || getDefaultDebounceWaitBasedOnCallback(props.onInput))}
           {...elementProps}
-          list={props.datalist ? datalistID() : undefined}
-          class="focusable absolute inset-0 z-20 h-full w-full rounded-lg bg-transparent text-left invalid:text-red-600"
+          class="absolute inset-0 z-20 h-full w-full bg-transparent text-left invalid:text-red-600 focus:outline-none"
         />
-        <Show when={props.datalist}>
-          <datalist id={datalistID()}>
-            <For each={props.datalist}>
-              {(value) => <option value={value} />}
-            </For>
-          </datalist>
-        </Show>
       </Interactive>
+      <Show when={needsFixing()}>
+        <ButtonDivider rgb={props.rgb} />
+        <Button
+          icon={IconTablerHammer}
+          rgb={props.rgb}
+          class={[props.class, needsFixing() ? 'rounded-l-none' : ''].join(' ')}
+          onClick={() => {
+            if (
+              props.value === undefined ||
+              (props.min !== undefined && props.value < props.min)
+            ) {
+              save(String(props.min))
+              props.onInput(String(props.min))
+            } else {
+              save(String(props.max))
+              props.onInput(String(props.max))
+            }
+          }}
+        />
+      </Show>
     </div>
   )
 }

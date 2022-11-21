@@ -4,17 +4,11 @@ import {
   modeOklch,
   modeP3,
   modeRgb,
-  useMode,
-  // @ts-ignore
+  useMode, // @ts-ignore next-line
 } from 'culori/fn'
-
-import { round } from '/src/scripts'
-
-import cryptoColors from '/src/assets/colors/crypto.json'
 
 const rgb = useMode(modeRgb)
 const oklch = useMode(modeOklch)
-const p3 = useMode(modeP3)
 
 export const colors = {
   rbg: {
@@ -36,78 +30,64 @@ export const colors = {
   },
 }
 
-const stringToRGB = (str: string): RGB => {
-  let hash = 0
+export const stringToRGB = (str: string): RGB => {
+  const stringToHash = (s: string) => {
+    for (var i = 0, h = 9; i < s.length; i++) {
+      h = Math.imul(h ^ s.charCodeAt(i++), 9 ** 9)
+    }
 
-  for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash)
+    return h ^ (h >>> 9)
   }
 
-  const rgb = []
-
-  for (let i = 0; i < 3; i++) {
-    rgb.push((hash >> (i * 8)) & 0xff)
-  }
+  const hash = stringToHash(str)
 
   return {
-    r: rgb[0],
-    g: rgb[1],
-    b: rgb[2],
+    r: (hash & 0x00ff0000) >> 16,
+    g: (hash & 0x0000ff00) >> 8,
+    b: hash & 0x000000ff,
   }
 }
 
-// TODO: Ditch function when OKLCH and color conversion is available on all browsers
-export const convertRGBToBackgroundColorProperty = (rgbColor: RGB) => {
+type Modifier = number | ((v: number) => number)
+
+export const convertRGBToCSSRGB = (
+  rgbColor: RGB,
+  options?: {
+    l?: Modifier
+    c?: Modifier
+    h?: Modifier
+    a?: string
+  }
+) => {
   const { r, g, b } = rgbColor
 
   const formattedRGB = `rgb(${r}, ${g}, ${b})`
 
   const color = oklch(rgb(formattedRGB))
 
-  color.l = 0.9
-
-  function formatOklch(color: any): string {
-    let { l, c, h, alpha } = color
-
-    let postfix = ''
-
-    const toPercent = (value: number): string => {
-      return `${round(100 * value)}%`
+  const applyModifier = (key: string, modifier?: Modifier) => {
+    if (modifier) {
+      color[key] =
+        typeof modifier === 'number' ? modifier : modifier(color[key])
     }
-
-    if (typeof alpha !== 'undefined' && alpha < 1) {
-      postfix = ` / ${toPercent(alpha)}`
-    }
-
-    return `oklch(${toPercent(l)} ${round(c, 3)} ${round(h || 0, 1)}${postfix})`
   }
 
-  const convertOklchToCSSProperty = (color: any, property: string) => {
-    let css = ''
-
-    const cssOKLCH = formatOklch(color)
-    const cssRGB = formatRgb(rgb(clampChroma(color, 'oklch')))
-
-    css = `${property}: ${cssRGB};`
-
-    const inP3 = (color: any): boolean => {
-      let { r, b, g } = p3(color)
-      return r >= 0 && r <= 1 && g >= 0 && g <= 1 && b >= 0 && b <= 1
-    }
-
-    if (inP3(color)) {
-      css += ` ${property}: ${cssOKLCH};`
-    }
-
-    return css
+  if (options) {
+    applyModifier('l', options.l)
+    applyModifier('c', options.c)
+    applyModifier('h', options.h)
   }
 
-  return convertOklchToCSSProperty(color, 'background-color')
+  const cssRGB = formatRgb(rgb(clampChroma(color, 'oklch')))
+
+  return options?.a ? `${cssRGB.slice(0, -1)} ${options.a})` : cssRGB
 }
 
-export const convertIDToBackgroundColorProperty = (id?: string) =>
-  id
-    ? convertRGBToBackgroundColorProperty(
-        (cryptoColors as any)[id] || stringToRGB(id)
-      )
-    : ''
+export const convertRGBToBackgroundCSSRGB = (rgb: RGB) =>
+  convertRGBToCSSRGB(rgb, { l: 0.9 })
+
+export const convertRGBToIconCSSRGB = (rgb: RGB) =>
+  convertRGBToCSSRGB(rgb, { l: 0.65, c: (c) => c / 2 })
+
+export const convertRGBToOffTextCSSRGB = (rgb: RGB) =>
+  convertRGBToCSSRGB(rgb, { l: 0.5, c: (c) => c / 2 })

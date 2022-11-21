@@ -1,4 +1,3 @@
-// @ts-ignore next-line
 import { fileURLToPath } from 'url'
 
 import { defineConfig } from 'vite'
@@ -13,14 +12,13 @@ import autoprefixer from 'autoprefixer'
 import tailwindcss from 'tailwindcss'
 
 export default defineConfig({
+  build: {
+    target: 'esnext',
+  },
   resolve: {
     alias: {
       '/src': fileURLToPath(new URL('./src', import.meta.url)),
     },
-  },
-  build: {
-    target: 'esnext',
-    polyfillDynamicImport: false,
   },
   plugins: [
     solidPlugin(),
@@ -41,12 +39,17 @@ export default defineConfig({
     }),
 
     pages({
-      exclude: ['**/components/*'],
+      exclude: [
+        '**/components/*',
+        '**/components/**/*',
+        '**/scripts/*',
+        '**/scripts/**/*',
+      ],
     }),
   ],
   css: {
     postcss: {
-      plugins: [autoprefixer(), tailwindcss() as any],
+      plugins: [autoprefixer(), tailwindcss()],
     },
   },
 })

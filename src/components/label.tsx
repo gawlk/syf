@@ -1,15 +1,23 @@
+import Title from './title'
+
 export interface Props extends SolidJS.ParentProps {
-  label: string
-  for: string
+  label: string | SolidJS.JSXElement
+  class?: string
 }
 
 export default (props: Props) => {
+  const id = `labeled-${Math.random()}`
+
   return (
-    <div class="w-full space-y-1">
-      <label for={props.for} class="ml-2 font-medium text-stone-500">
-        {props.label}
+    <div>
+      <label for={id}>
+        <Title level={6} margin>
+          {props.label}
+        </Title>
       </label>
-      {props.children}
+      <div id={id} class={props.class ?? 'space-y-2'}>
+        {props.children}
+      </div>
     </div>
   )
 }

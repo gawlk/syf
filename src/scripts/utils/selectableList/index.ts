@@ -2,7 +2,7 @@ export const createSelectableList = <T>(
   list: T[],
   parameters?: {
     selected?: T | number | null
-    index?: true
+    index?: true // Used when T is of type number
   }
 ): SelectableList<T> => {
   const selected = parameters?.selected

@@ -4,8 +4,7 @@ import { type InteractiveProps } from './interactive'
 
 export interface Props extends InteractiveProps {
   // Illustrations
-  svg?: any
-  src?: string
+  icon?: string | ((...args: any[]) => SolidJS.JSXElement) | true
 
   // Sides
   left?: boolean
@@ -13,11 +12,19 @@ export interface Props extends InteractiveProps {
 }
 
 export default (props: Props) => {
+  const isSpan = createMemo(
+    () => !props.icon || typeof props.icon === 'boolean'
+  )
+
+  const isImage = createMemo(() => typeof props.icon === 'string')
+
   return (
     // TODO: Load image if in viewport
     <Dynamic
-      component={props.src ? 'img' : props.svg || 'span'}
-      src={props.src}
+      // @ts-ignore next-line
+      component={isSpan() ? 'span' : isImage() ? 'img' : props.icon}
+      {...(isImage() ? { src: props.icon } : {})}
+      style={props.style}
       class={[
         // Sizes
         props.lg
@@ -41,9 +48,12 @@ export default (props: Props) => {
             : 'ml-1.5 -mr-1.5'
           : '',
 
-        ...(props.src
+        ...(isImage()
           ? ['object-contain', defaultRounded ? 'rounded-md' : '']
-          : ['opacity-40 transition duration-200 group-hover:opacity-50']),
+          : [
+              props.primary ? 'text-stone-500' : 'text-stone-400',
+              props.disabled ? 'transition-none' : 'transition duration-200',
+            ]),
 
         'flex-none',
 

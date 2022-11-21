@@ -4,7 +4,7 @@ import Button, { type ButtonProps } from './button'
 import Divider from './divider'
 
 interface DialogButtonProps {
-  text?: string
+  text?: string | SolidJS.JSXElement
 }
 
 type DialogButtonPropsKeys = keyof Required<DialogButtonProps>
@@ -21,6 +21,7 @@ interface ComponentsProps {
   button: CustomDialogButtonProps
   sticky?: SolidJS.JSXElement
   title?: string
+  full?: true
   onClose?: (value?: string) => void
 }
 
@@ -30,6 +31,7 @@ const propsSpecificToComponent: { [T in ComponentsPropsKeys]: boolean } = {
   button: true,
   sticky: true,
   title: true,
+  full: true,
   onClose: true,
 }
 
@@ -40,21 +42,24 @@ interface Props extends ComponentsProps, SolidJS.JSXDialogHTMLAttributes {}
 export default (props: Props) => {
   let dialog: HTMLDialogElement | undefined
 
-  const buttonProps = removeProps(props.button, propsSpecificToDialogButton)
+  const buttonProps = createMemo(() =>
+    mergeProps(removeProps(props.button, propsSpecificToDialogButton), {
+      rightIcon: props.button.rightIcon ?? IconTablerChevronRight,
+      rightIconClass:
+        props.button.rightIconClass ??
+        'group-hover:translate-x-1 will-change-transform',
+    })
+  )
 
-  const dialogProps = removeProps(props, propsSpecificToComponent)
+  const dialogProps = createMemo(() =>
+    removeProps(props, propsSpecificToComponent)
+  )
 
   return (
-    <div>
-      <Button
-        {...buttonProps}
-        rightSvg={IconTablerChevronRight}
-        rightIllustrationClass="group-hover:translate-x-1 will-change-transform"
-        onClick={() => dialog?.showModal()}
-      >
+    <div class={props.button.full ? 'w-full' : ''}>
+      <Button {...buttonProps()} onClick={() => dialog?.showModal()}>
         <span class="flex-1 text-left">{props.button.text}</span>
       </Button>
-      {/* TODO: Catch ESC so that the event isn't spread to the OS */}
       <dialog
         // @ts-ignore next-line
         on:close={(event) => {
@@ -62,13 +67,23 @@ export default (props: Props) => {
 
           props.onClose?.(returnValue)
         }}
-        {...dialogProps}
+        {...dialogProps()}
         ref={dialog}
-        class="mt-[5vh] h-[95vh] w-full max-w-full flex-col space-y-4 rounded-t-xl p-6 pb-0 backdrop:bg-black/25 open:flex md:mt-[10vh] md:h-fit md:max-h-[32rem] md:max-w-2xl md:rounded-b-xl"
+        class={[
+          props.full ? 'h-full' : '',
+          'top-auto bottom-0 mt-[5vh] max-h-[95vh] w-full max-w-full flex-col space-y-4 rounded-t-2xl p-6 pb-0 backdrop:bg-black/25 open:flex md:top-[10vh] md:mt-0 md:h-fit md:max-h-[32rem] md:max-w-2xl md:rounded-b-2xl',
+        ].join(' ')}
       >
-        <div class="flex items-center space-x-2">
-          <Button sm svg={IconTablerX} onClick={() => dialog?.close('')} />
-          <h2 class="flex-1 text-center text-xl">{props.title}</h2>
+        <div class="relative flex items-center space-x-2">
+          <Button
+            sm
+            icon={IconTablerX}
+            onClick={() => dialog?.close('')}
+            class="absolute inset-y-0 left-0 -m-1.5"
+          />
+          <h2 class="flex-1 text-center text-xl font-semibold">
+            {props.title}
+          </h2>
         </div>
         <Divider />
         {props.sticky}

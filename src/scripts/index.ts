@@ -1,4 +1,4 @@
 export * from './api'
-export * from './chart'
-
+export * from './indicators'
+export * from './strategies'
 export * from './utils'

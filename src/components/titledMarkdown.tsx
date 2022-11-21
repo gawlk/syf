@@ -1,7 +1,7 @@
 import snarkdown from 'snarkdown'
 
 import Paragraph from './paragraph'
-import Title, { Props as PropsTitle } from './title'
+import Title, { type Props as PropsTitle } from './title'
 
 export interface Props extends PropsTitle {
   title: string | SolidJS.JSXElement

@@ -1,73 +1,86 @@
-import Input from '/src/components/input'
-import Section from '/src/components/section'
+import DialogDate from '/src/components/dialogDate'
+import Section, { type Props as SectionProps } from '/src/components/section'
 
-export default () => {
-  const [searchParams, setSearchParams] = useSearchParams()
+interface Props {
+  setter: (start: Date, end: Date) => void
+}
 
-  const today = new Date()
+export const defaultEnd = new Date()
+defaultEnd.setUTCHours(0, 0, 0, 0)
 
-  const defaultDate = new Date(today)
-  defaultDate.setDate(defaultDate.getDate() - 365)
+export const defaultStart = new Date(defaultEnd)
+defaultStart.setUTCFullYear(defaultStart.getUTCFullYear() - 5)
+
+export default (props: Props) => {
+  const sectionProps: SectionProps = {
+    id: 'interval',
+    title: 'Interval',
+    description: `Select an interval here`,
+    numerate: true,
+  }
+
+  const max = new Date(defaultEnd)
+  const min = new Date(0)
 
   const [state, setState] = createStore({
-    start: defaultDate,
-    end: today,
+    start: defaultStart,
+    end: defaultEnd,
   })
 
-  const toISO = (date: Date) => date.toISOString().split('T')[0]
+  createEffect(() => {
+    props.setter(state.start, state.end)
+  })
 
   return (
-    <Section title="Interval" description={`Select intervals here`}>
-      <For
-        each={[
-          {
-            pre: 'Start',
-            icon: IconTablerArrowBarRight,
-            valueKey: 'start',
-            default: defaultDate,
-          },
-          {
-            pre: 'End',
-            icon: IconTablerArrowBarToRight,
-            valueKey: 'end',
-            default: today,
-          },
-        ]}
-      >
-        {(obj) => {
-          return (
-            <Input
-              id={`${obj.pre.toLowerCase()}-date`}
-              pre={obj.pre}
-              leftSvg={obj.icon}
-              type="date"
-              value={toISO((state as any)[obj.valueKey])}
-              max={toISO(today)}
-              onInput={(event) => {
-                const input = event.target as HTMLInputElement
-                const value = input.value
-
-                if (!value) {
-                  if ((state as any)[obj.valueKey] === obj.default) {
-                    input.value = toISO(defaultDate)
-                  } else {
-                    setState(obj.valueKey as any, obj.default)
-                  }
-                }
+    <Section {...sectionProps}>
+      <div class="space-y-2">
+        <For
+          each={[
+            {
+              key: 'start' as 'start' | 'end',
+              icon: IconTablerArrowBarRight,
+              pre: 'Start',
+              title: 'Starting date',
+              default: defaultStart,
+            },
+            {
+              key: 'end' as 'start' | 'end',
+              icon: IconTablerArrowBarToRight,
+              pre: 'End',
+              title: 'Ending date',
+              default: defaultEnd,
+            },
+          ]}
+        >
+          {(obj) => (
+            <DialogDate
+              id={`${sectionProps.id}-${obj.key}`}
+              button={{
+                leftIcon: obj.icon,
+                pre: obj.pre,
+                text: state[obj.key]
+                  .toUTCString()
+                  .split(' ')
+                  .slice(0, 4)
+                  .join(' '),
               }}
-              onFocusOut={(event) => {
-                const input = event.target as HTMLInputElement
-                const value = input.value
-
+              title={obj.title}
+              value={state[obj.key]}
+              reset={{
+                default: obj.default,
+                callback: () => setState(obj.key, obj.default),
+              }}
+              max={max}
+              min={min}
+              onClose={(value) => {
                 if (value) {
-                  const date = new Date(value)
-                  setState(obj.valueKey as any, date)
+                  setState(obj.key, new Date(value))
                 }
               }}
             />
-          )
-        }}
-      </For>
+          )}
+        </For>
+      </div>
     </Section>
   )
 }

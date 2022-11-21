@@ -2,6 +2,10 @@
 // /!\ Warning: Interfaces may not be complete
 // ---
 
+interface CoinGeckoObjectWithCurrencyAsKeys<T> {
+  [currency: string]: T
+}
+
 interface CoinGeckoAssetData {
   id: string
   symbol: string
@@ -50,22 +54,22 @@ interface CoinGeckoAssetData {
   liquidity_score: number
   public_interest_score: number
   market_data?: {
-    current_price: ObjectWithCurrencyAsKeys<number>
+    current_price: CoinGeckoObjectWithCurrencyAsKeys<number>
     total_value_locked: null
     mcap_to_tvl_ratio: null
     fdv_to_tvl_ratio: null
-    ath: ObjectWithCurrencyAsKeys<number>
-    ath_change_percentage: ObjectWithCurrencyAsKeys<number>
-    ath_date: ObjectWithCurrencyAsKeys<string>
-    atl: ObjectWithCurrencyAsKeys<number>
-    atl_change_percentage: ObjectWithCurrencyAsKeys<number>
-    atl_date: ObjectWithCurrencyAsKeys<string>
-    market_cap: ObjectWithCurrencyAsKeys<number>
+    ath: CoinGeckoObjectWithCurrencyAsKeys<number>
+    ath_change_percentage: CoinGeckoObjectWithCurrencyAsKeys<number>
+    ath_date: CoinGeckoObjectWithCurrencyAsKeys<string>
+    atl: CoinGeckoObjectWithCurrencyAsKeys<number>
+    atl_change_percentage: CoinGeckoObjectWithCurrencyAsKeys<number>
+    atl_date: CoinGeckoObjectWithCurrencyAsKeys<string>
+    market_cap: CoinGeckoObjectWithCurrencyAsKeys<number>
     market_cap_rank: number
     fully_diluted_valuation: {}
-    total_volume: ObjectWithCurrencyAsKeys<number>
-    high_24h: ObjectWithCurrencyAsKeys<number>
-    low_24h: ObjectWithCurrencyAsKeys<number>
+    total_volume: CoinGeckoObjectWithCurrencyAsKeys<number>
+    high_24h: CoinGeckoObjectWithCurrencyAsKeys<number>
+    low_24h: CoinGeckoObjectWithCurrencyAsKeys<number>
     price_change_24h: number
     price_change_percentage_24h: number
     price_change_percentage_7d: number
@@ -76,17 +80,17 @@ interface CoinGeckoAssetData {
     price_change_percentage_1y: number
     market_cap_change_24h: number
     market_cap_change_percentage_24h: number
-    price_change_24h_in_currency: ObjectWithCurrencyAsKeys<number>
-    price_change_percentage_1h_in_currency: ObjectWithCurrencyAsKeys<number>
-    price_change_percentage_24h_in_currency: ObjectWithCurrencyAsKeys<number>
-    price_change_percentage_7d_in_currency: ObjectWithCurrencyAsKeys<number>
-    price_change_percentage_14d_in_currency: ObjectWithCurrencyAsKeys<number>
-    price_change_percentage_30d_in_currency: ObjectWithCurrencyAsKeys<number>
-    price_change_percentage_60d_in_currency: ObjectWithCurrencyAsKeys<number>
-    price_change_percentage_200d_in_currency: ObjectWithCurrencyAsKeys<number>
-    price_change_percentage_1y_in_currency: ObjectWithCurrencyAsKeys<number>
-    market_cap_change_24h_in_currency: ObjectWithCurrencyAsKeys<number>
-    market_cap_change_percentage_24h_in_currency: ObjectWithCurrencyAsKeys<number>
+    price_change_24h_in_currency: CoinGeckoObjectWithCurrencyAsKeys<number>
+    price_change_percentage_1h_in_currency: CoinGeckoObjectWithCurrencyAsKeys<number>
+    price_change_percentage_24h_in_currency: CoinGeckoObjectWithCurrencyAsKeys<number>
+    price_change_percentage_7d_in_currency: CoinGeckoObjectWithCurrencyAsKeys<number>
+    price_change_percentage_14d_in_currency: CoinGeckoObjectWithCurrencyAsKeys<number>
+    price_change_percentage_30d_in_currency: CoinGeckoObjectWithCurrencyAsKeys<number>
+    price_change_percentage_60d_in_currency: CoinGeckoObjectWithCurrencyAsKeys<number>
+    price_change_percentage_200d_in_currency: CoinGeckoObjectWithCurrencyAsKeys<number>
+    price_change_percentage_1y_in_currency: CoinGeckoObjectWithCurrencyAsKeys<number>
+    market_cap_change_24h_in_currency: CoinGeckoObjectWithCurrencyAsKeys<number>
+    market_cap_change_percentage_24h_in_currency: CoinGeckoObjectWithCurrencyAsKeys<number>
     total_supply: number
     max_supply: null
     circulating_supply: number
@@ -167,9 +171,9 @@ interface CoinGeckoGlobalData {
     ongoing_icos: number
     ended_icos: number
     markets: number
-    total_market_cap: ObjectWithCurrencyAsKeys<number>
-    total_volume: ObjectWithCurrencyAsKeys<number>
-    market_cap_percentage: ObjectWithCurrencyAsKeys<number>
+    total_market_cap: CoinGeckoObjectWithCurrencyAsKeys<number>
+    total_volume: CoinGeckoObjectWithCurrencyAsKeys<number>
+    market_cap_percentage: CoinGeckoObjectWithCurrencyAsKeys<number>
     market_cap_change_percentage_24h_usd: number
   }
 }

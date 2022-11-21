@@ -2,7 +2,7 @@ import { createResizeObserver } from '@solid-primitives/resize-observer'
 
 import {
   createChartWrapper,
-  convertIDToBackgroundColorProperty,
+  convertStringToBackgroundColorProperty,
   applyColorOnArea,
   applyColorOnPriceLine,
   debounce,
@@ -158,7 +158,7 @@ export default (props: Props) => {
   return (
     <Card
       url={`/assets/crypto/${props.asset?.id}`}
-      style={convertIDToBackgroundColorProperty(props.asset?.id)}
+      style={convertStringToBackgroundColorProperty(props.asset?.id)}
       loading={!props.asset}
       class="bg-black bg-opacity-10 hover:brightness-95"
     >

@@ -4,3 +4,6 @@ export const round = (value: number, digits: number = 0): number => {
     10 ** digits
   )
 }
+
+export const average = (values: number[]) =>
+  values.reduce((p, c) => (c += p)) / values.length

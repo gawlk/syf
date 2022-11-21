@@ -4,9 +4,9 @@ import {
   applyColorOnArea,
   applyColorOnHistogram,
   applyColorOnPriceLine,
-  createCoinGeckoAPI,
+  convertStringToBackgroundColorProperty,
   createChartWrapper,
-  convertIDToBackgroundColorProperty,
+  createCoinGeckoAPI,
   debounce,
 } from '/src/scripts'
 
@@ -30,7 +30,7 @@ export default () => {
 
   const params = useParams()
 
-  const backgroundColor = convertIDToBackgroundColorProperty(params.id)
+  const backgroundColor = convertStringToBackgroundColorProperty(params.id)
   const defaultLegendDate = 'Now'
   const defaultLegendPrice = '?'
   const defaultLegendVolume = '?'

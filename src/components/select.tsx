@@ -9,7 +9,6 @@ interface ComponentsProps {
   values: string[]
   labels?: string[]
   selected?: string
-  pre?: string
   resetOnChange?: boolean
   placeholder?: string
   image?: string
@@ -21,7 +20,6 @@ const propsSpecificToComponent: { [T in ComponentsPropsKeys]: boolean } = {
   values: true,
   labels: true,
   selected: true,
-  pre: true,
   resetOnChange: true,
   placeholder: true,
   image: true,
@@ -36,7 +34,7 @@ export default (props: Props) => {
   const propsToSpread = removeProps<Props>(
     mergeProps(props, {
       full: props.full ?? true,
-      rightSvg: IconTablerSelector,
+      rightIcon: IconTablerSelector,
       class: props.class + ' relative',
     } as Props),
     propsSpecificToComponent
@@ -48,17 +46,7 @@ export default (props: Props) => {
   )
 
   return (
-    <Interactive component={'div'} {...interactiveProps}>
-      <Show when={props.pre}>
-        <span
-          class={[
-            props.primary ? 'text-white' : 'text-black',
-            'whitespace-pre-wrap text-opacity-50 group-hover:text-opacity-60',
-          ].join(' ')}
-        >
-          {props.pre}:{' '}
-        </span>
-      </Show>
+    <Interactive component={'div'} focusable {...interactiveProps}>
       <span class="flex-1 truncate">
         {props.selected
           ? (props.labels || props.values).at(

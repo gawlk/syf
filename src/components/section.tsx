@@ -1,9 +1,12 @@
-import Title from './title'
+import Details from './details'
 import Paragraph from './paragraph'
+import Title from './title'
 
-interface Props extends SolidJS.ParentProps {
+export interface Props extends SolidJS.ParentProps {
+  id: string
   title: string | SolidJS.JSXElement
-  description: string | SolidJS.JSXElement
+  description?: string | SolidJS.JSXElement
+  numerate?: boolean
 }
 
 export default (props: Props) => {
@@ -13,27 +16,40 @@ export default (props: Props) => {
 
   let section: HTMLElement | undefined
 
-  onMount(() => {
-    Array.from(section?.parentElement?.querySelectorAll('section') || []).some(
-      (_section, index) => section === _section && setNumber(index + 1)
-    )
-  })
+  if (props.numerate) {
+    onMount(() => {
+      Array.from(
+        section?.parentElement?.querySelectorAll('section') || []
+      ).some((_section, index) => section === _section && setNumber(index + 1))
+    })
+  }
 
   return (
-    <section ref={section} class="space-y-6">
-      <Title level={level} margin>
-        <div class="flex items-center space-x-3">
-          <div
-            style="font-size: 0.7em"
-            class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-black text-white"
-          >
-            <span>{number()}</span>
-          </div>
-          <span>{props.title}</span>
-        </div>
-      </Title>
-      <Paragraph level={level}>{props.description}</Paragraph>
-      {props.children}
+    <section id={`${props.id}-section`} ref={section}>
+      <Details
+        id={props.id}
+        summary={
+          <Title level={level}>
+            <Show when={props.numerate} fallback={props.title}>
+              <div class="flex items-center space-x-3">
+                <div
+                  style="font-size: 0.7em"
+                  class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-black text-white"
+                >
+                  <span>{number()}</span>
+                </div>
+                <span>{props.title}</span>
+              </div>
+            </Show>
+          </Title>
+        }
+        class="space-y-6"
+      >
+        <Show when={props.description}>
+          <Paragraph level={level}>{props.description}</Paragraph>
+        </Show>
+        {props.children}
+      </Details>
     </section>
   )
 }

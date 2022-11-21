@@ -1,4 +1,4 @@
-export const filterPropsKeys = <T>(
+export const filterPropsKeys = <T extends Object>(
   props: T,
   propsKeys: BooleanObject,
   filter: 'include' | 'exclude' = 'include'
@@ -7,8 +7,12 @@ export const filterPropsKeys = <T>(
     filter === 'include' ? propsKeys[key] : !propsKeys[key]
   ) as (keyof T)[]
 
-export const keepProps = <T>(props: T, propsKeys: BooleanObject) =>
-  splitProps(props, filterPropsKeys<T>(props, propsKeys))[0]
+export const keepProps = <T extends Object>(
+  props: T,
+  propsKeys: BooleanObject
+) => splitProps(props, filterPropsKeys<T>(props, propsKeys))[0]
 
-export const removeProps = <T>(props: T, propsKeys: BooleanObject) =>
-  splitProps(props, filterPropsKeys<T>(props, propsKeys, 'exclude'))[0]
+export const removeProps = <T extends Object>(
+  props: T,
+  propsKeys: BooleanObject
+) => splitProps(props, filterPropsKeys<T>(props, propsKeys, 'exclude'))[0]
